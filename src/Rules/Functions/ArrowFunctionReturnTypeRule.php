@@ -2,7 +2,6 @@
 
 namespace PHPStan\Rules\Functions;
 
-use Generator;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\DependencyInjection\RegisteredRule;
@@ -11,7 +10,6 @@ use PHPStan\Rules\FunctionReturnTypeCheck;
 use PHPStan\Rules\Rule;
 use PHPStan\ShouldNotHappenException;
 use PHPStan\Type\NeverType;
-use PHPStan\Type\ObjectType;
 
 /**
  * @implements Rule<InArrowFunctionNode>
@@ -36,8 +34,6 @@ final class ArrowFunctionReturnTypeRule implements Rule
 		}
 
 		$returnType = $scope->getAnonymousFunctionReturnType();
-		$generatorType = new ObjectType(Generator::class);
-
 		$originalNode = $node->getOriginalNode();
 		$isVoidSuperType = $returnType->isVoid();
 		if ($originalNode->returnType === null && $isVoidSuperType->yes()) {
@@ -63,7 +59,7 @@ final class ArrowFunctionReturnTypeRule implements Rule
 			'Anonymous function with return type void returns %s but should not return anything.',
 			'Anonymous function should return %s but returns %s.',
 			'Anonymous function should never return but return statement found.',
-			$generatorType->isSuperTypeOf($returnType)->yes(),
+			$originalNode->expr instanceof Node\Expr\Yield_ || $originalNode->expr instanceof Node\Expr\YieldFrom,
 		);
 	}
 
